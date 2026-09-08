@@ -1,6 +1,12 @@
 @TestProject_HostAddress = http://localhost:5095
 
-GET {{TestProject_HostAddress}}/weatherforecast/
-Accept: application/json
+POST {{TestProject_HostAddress}}/report/user_statistics
+Content-Type: application/json
+
+{
+  "userId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "from": "2026-01-01",
+  "to": "2026-01-31"
+}
 
 ###
