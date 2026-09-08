@@ -10,3 +10,8 @@ Content-Type: application/json
 }
 
 ###
+
+GET {{TestProject_HostAddress}}/report/info?query=1a98b57d-e090-4d18-8654-678e463b73e8
+Accept: application/json
+
+###

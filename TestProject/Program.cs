@@ -58,4 +58,23 @@ app.MapPost("/report/user_statistics", (UserStatisticsRequest request) =>
 })
 .WithName("RequestUserStatisticsReport");
 
+app.MapGet("/report/info", (Guid query) =>
+{
+    if (query == Guid.Empty)
+    {
+        return Results.ValidationProblem(new Dictionary<string, string[]>
+        {
+            [nameof(query)] = ["Идентификатор запроса обязателен."]
+        });
+    }
+
+    return Results.Ok(new ReportInfoResponse
+    {
+        Query = query,
+        Percent = 0,
+        Result = null
+    });
+})
+.WithName("GetReportInfo");
+
 app.Run();
