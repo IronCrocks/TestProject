@@ -31,6 +31,9 @@ app.MapPost("/report/user_statistics", async (
     ApplicationDbContext dbContext,
     CancellationToken cancellationToken) =>
 {
+    
+#region Validation
+
     if (request.UserId == Guid.Empty)
     {
         return Results.ValidationProblem(new Dictionary<string, string[]>
@@ -62,6 +65,8 @@ app.MapPost("/report/user_statistics", async (
             [nameof(request.From)] = ["Дата начала периода не может быть позже даты окончания."]
         });
     }
+    
+#endregion
 
     var reportJobId = Guid.NewGuid();
     var reportJob = new ReportJob

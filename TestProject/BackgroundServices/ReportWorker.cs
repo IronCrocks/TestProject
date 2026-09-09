@@ -24,21 +24,18 @@ public sealed class ReportWorker(
     {
         await using var scope = serviceScopeFactory.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var completionCutoff = DateTime.UtcNow
+            .AddMilliseconds(-options.Value.DurationMilliseconds);
         var pendingReportJobs = await dbContext.ReportJobs
-            .Where(reportJob => reportJob.Status == ReportJobStatus.Pending)
+            .Where(reportJob =>
+                reportJob.Status == ReportJobStatus.Pending &&
+                reportJob.CreatedAt <= completionCutoff)
             .ToListAsync(cancellationToken);
 
-        var now = DateTime.UtcNow;
-        var duration = TimeSpan.FromMilliseconds(options.Value.DurationMilliseconds);
         var hasChanges = false;
 
         foreach (var reportJob in pendingReportJobs)
         {
-            if (now - reportJob.CreatedAt < duration)
-            {
-                continue;
-            }
-
             reportJob.Status = ReportJobStatus.Completed;
             reportJob.CountSignIn ??= 10;
             hasChanges = true;
