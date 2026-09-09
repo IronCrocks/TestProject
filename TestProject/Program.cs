@@ -11,9 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddSingleton<ReportWorker>();
-builder.Services.AddHostedService(serviceProvider =>
-    serviceProvider.GetRequiredService<ReportWorker>());
+builder.Services.Configure<ReportWorkerOptions>(
+    builder.Configuration.GetSection(ReportWorkerOptions.SectionName));
+builder.Services.AddHostedService<ReportWorker>();
 
 var app = builder.Build();
 
