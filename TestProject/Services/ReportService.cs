@@ -40,12 +40,16 @@ public sealed class ReportService(
         CancellationToken cancellationToken)
     {
         var reportJob = await dbContext.ReportJobs
-            .AsNoTracking()
             .SingleOrDefaultAsync(reportJob => reportJob.Id == query, cancellationToken);
 
         if (reportJob is null)
         {
             return null;
+        }
+
+        if (CompleteReportIfExpired(reportJob))
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
         }
 
         var durationMilliseconds = options.Value.DurationMilliseconds;
@@ -80,15 +84,35 @@ public sealed class ReportService(
                 reportJob.CreatedAt <= completionCutoff)
             .ToListAsync(cancellationToken);
 
+        var hasChanges = false;
+
         foreach (var reportJob in pendingReportJobs)
         {
-            reportJob.Status = ReportJobStatus.Completed;
-            reportJob.CountSignIn ??= 10;
+            hasChanges |= CompleteReportIfExpired(reportJob);
         }
 
-        if (pendingReportJobs.Count > 0)
+        if (hasChanges)
         {
             await dbContext.SaveChangesAsync(cancellationToken);
         }
+    }
+
+    private bool CompleteReportIfExpired(ReportJob reportJob)
+    {
+        if (reportJob.Status != ReportJobStatus.Pending)
+        {
+            return false;
+        }
+
+        var duration = TimeSpan.FromMilliseconds(options.Value.DurationMilliseconds);
+        if (DateTime.UtcNow - reportJob.CreatedAt < duration)
+        {
+            return false;
+        }
+
+        reportJob.Status = ReportJobStatus.Completed;
+        reportJob.CountSignIn = 10;
+
+        return true;
     }
 }
