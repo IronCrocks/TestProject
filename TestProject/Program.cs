@@ -16,6 +16,7 @@ if (string.IsNullOrWhiteSpace(connectionString))
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddProblemDetails();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services
@@ -29,6 +30,8 @@ builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddHostedService<ReportWorker>();
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
