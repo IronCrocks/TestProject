@@ -40,6 +40,7 @@ public sealed class ReportWorker(
             }
 
             reportJob.Status = ReportJobStatus.Completed;
+            reportJob.CountSignIn ??= 10;
             hasChanges = true;
         }
 
