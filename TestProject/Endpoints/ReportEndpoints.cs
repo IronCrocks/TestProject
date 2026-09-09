@@ -1,9 +1,5 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using TestProject.BackgroundServices;
 using TestProject.Contracts;
-using TestProject.Data;
-using TestProject.Data.Entities;
+using TestProject.Services;
 
 namespace TestProject.Endpoints;
 
@@ -23,7 +19,7 @@ public static class ReportEndpoints
 
     private static async Task<IResult> RequestUserStatisticsReport(
         UserStatisticsRequest request,
-        ApplicationDbContext dbContext,
+        IReportService reportService,
         CancellationToken cancellationToken)
     {
         
@@ -63,28 +59,18 @@ public static class ReportEndpoints
 
 #endregion
 
-        var reportJobId = Guid.NewGuid();
-        var reportJob = new ReportJob
-        {
-            Id = reportJobId,
-            UserId = request.UserId,
-            From = request.From.Value.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc),
-            To = request.To.Value.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc),
-            CreatedAt = DateTime.UtcNow,
-            Status = ReportJobStatus.Pending,
-            CountSignIn = null
-        };
-
-        dbContext.ReportJobs.Add(reportJob);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        var reportJobId = await reportService.CreateReportJobAsync(
+            request.UserId,
+            request.From.Value,
+            request.To.Value,
+            cancellationToken);
 
         return Results.Ok(reportJobId);
     }
 
     private static async Task<IResult> GetReportInfo(
         Guid query,
-        ApplicationDbContext dbContext,
-        IOptions<ReportWorkerOptions> options,
+        IReportService reportService,
         CancellationToken cancellationToken)
     {
         if (query == Guid.Empty)
@@ -95,41 +81,10 @@ public static class ReportEndpoints
             });
         }
 
-        var reportJob = await dbContext.ReportJobs
-            .AsNoTracking()
-            .SingleOrDefaultAsync(reportJob => reportJob.Id == query, cancellationToken);
+        var reportInfo = await reportService.GetReportInfoAsync(query, cancellationToken);
 
-        if (reportJob is null)
-        {
-            return Results.NotFound();
-        }
-
-        var durationMilliseconds = options.Value.DurationMilliseconds;
-        if (durationMilliseconds <= 0)
-        {
-            return Results.Problem(
-                "Значение ReportWorker:DurationMilliseconds должно быть больше нуля.",
-                statusCode: StatusCodes.Status500InternalServerError);
-        }
-
-        var percent = reportJob.Status == ReportJobStatus.Completed
-            ? 100
-            : (int)Math.Clamp(
-                Math.Floor((DateTime.UtcNow - reportJob.CreatedAt).TotalMilliseconds * 100 / durationMilliseconds),
-                0,
-                100);
-
-        return Results.Ok(new ReportInfoResponse
-        {
-            Query = query,
-            Percent = percent,
-            Result = percent == 100
-                ? new UserStatisticsResult
-                {
-                    UserId = reportJob.UserId,
-                    CountSignIn = reportJob.CountSignIn ?? 10
-                }
-                : null
-        });
+        return reportInfo is null
+            ? Results.NotFound()
+            : Results.Ok(reportInfo);
     }
 }
