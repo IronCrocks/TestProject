@@ -9,7 +9,8 @@ namespace TestProject.Services;
 
 public sealed class ReportService(
     ApplicationDbContext dbContext,
-    IOptions<ReportProcessingOptions> options) : IReportService
+    IOptions<ReportProcessingOptions> options,
+    TimeProvider timeProvider) : IReportService
 {
     public async Task<Guid> CreateReportJobAsync(
         Guid userId,
@@ -24,7 +25,7 @@ public sealed class ReportService(
             UserId = userId,
             From = from.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc),
             To = to.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc),
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = timeProvider.GetUtcNow().UtcDateTime,
             Status = ReportJobStatus.Pending,
             CountSignIn = null
         };
@@ -56,7 +57,7 @@ public sealed class ReportService(
         var percent = reportJob.Status == ReportJobStatus.Completed
             ? 100
             : (int)Math.Clamp(
-                Math.Floor((DateTime.UtcNow - reportJob.CreatedAt).TotalMilliseconds * 100 / durationMilliseconds),
+                Math.Floor((timeProvider.GetUtcNow().UtcDateTime - reportJob.CreatedAt).TotalMilliseconds * 100 / durationMilliseconds),
                 0,
                 100);
 
@@ -76,7 +77,7 @@ public sealed class ReportService(
 
     public async Task CompleteExpiredReportJobsAsync(CancellationToken cancellationToken)
     {
-        var completionCutoff = DateTime.UtcNow
+        var completionCutoff = timeProvider.GetUtcNow().UtcDateTime
             .AddMilliseconds(-options.Value.DurationMilliseconds);
         var pendingReportJobs = await dbContext.ReportJobs
             .Where(reportJob =>
@@ -105,7 +106,7 @@ public sealed class ReportService(
         }
 
         var duration = TimeSpan.FromMilliseconds(options.Value.DurationMilliseconds);
-        if (DateTime.UtcNow - reportJob.CreatedAt < duration)
+        if (timeProvider.GetUtcNow().UtcDateTime - reportJob.CreatedAt < duration)
         {
             return false;
         }

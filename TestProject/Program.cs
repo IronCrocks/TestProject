@@ -34,6 +34,7 @@ builder.Services
         options => options.PollingInterval > TimeSpan.Zero,
         "ReportWorker:PollingInterval должен быть больше нуля.")
     .ValidateOnStart();
+builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddHostedService<ReportWorker>();
 
