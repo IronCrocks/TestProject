@@ -27,6 +27,13 @@ builder.Services
         options => options.DurationMilliseconds > 0,
         "ReportProcessing:DurationMilliseconds должен быть больше нуля.")
     .ValidateOnStart();
+builder.Services
+    .AddOptions<ReportWorkerOptions>()
+    .Bind(builder.Configuration.GetSection(ReportWorkerOptions.SectionName))
+    .Validate(
+        options => options.PollingInterval > TimeSpan.Zero,
+        "ReportWorker:PollingInterval должен быть больше нуля.")
+    .ValidateOnStart();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddHostedService<ReportWorker>();
 

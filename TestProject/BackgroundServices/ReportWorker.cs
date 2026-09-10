@@ -1,14 +1,17 @@
+using Microsoft.Extensions.Options;
+using TestProject.Options;
 using TestProject.Services;
 
 namespace TestProject.BackgroundServices;
 
 public sealed class ReportWorker(
     IServiceScopeFactory serviceScopeFactory,
-    ILogger<ReportWorker> logger) : BackgroundService
+    ILogger<ReportWorker> logger,
+    IOptions<ReportWorkerOptions> options) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+        using var timer = new PeriodicTimer(options.Value.PollingInterval);
 
         while (!stoppingToken.IsCancellationRequested)
         {
