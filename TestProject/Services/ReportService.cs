@@ -1,15 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using TestProject.BackgroundServices;
-using TestProject.Contracts;
 using TestProject.Data;
 using TestProject.Data.Entities;
+using TestProject.Options;
+using TestProject.Services.Models;
 
 namespace TestProject.Services;
 
 public sealed class ReportService(
     ApplicationDbContext dbContext,
-    IOptions<ReportWorkerOptions> options) : IReportService
+    IOptions<ReportProcessingOptions> options) : IReportService
 {
     public async Task<Guid> CreateReportJobAsync(
         Guid userId,
@@ -35,12 +35,12 @@ public sealed class ReportService(
         return reportJobId;
     }
 
-    public async Task<ReportInfoResponse?> GetReportInfoAsync(
-        Guid query,
+    public async Task<ReportJobInfo?> GetReportInfoAsync(
+        Guid reportJobId,
         CancellationToken cancellationToken)
     {
         var reportJob = await dbContext.ReportJobs
-            .SingleOrDefaultAsync(reportJob => reportJob.Id == query, cancellationToken);
+            .SingleOrDefaultAsync(reportJob => reportJob.Id == reportJobId, cancellationToken);
 
         if (reportJob is null)
         {
@@ -60,12 +60,12 @@ public sealed class ReportService(
                 0,
                 100);
 
-        return new ReportInfoResponse
+        return new ReportJobInfo
         {
-            Query = query,
+            ReportJobId = reportJobId,
             Percent = percent,
             Result = percent == 100
-                ? new UserStatisticsResult
+                ? new UserStatisticsReportResult
                 {
                     UserId = reportJob.UserId,
                     CountSignIn = reportJob.CountSignIn ?? 10

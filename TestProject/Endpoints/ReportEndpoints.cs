@@ -1,5 +1,6 @@
 using TestProject.Contracts;
 using TestProject.Services;
+using TestProject.Services.Models;
 
 namespace TestProject.Endpoints;
 
@@ -85,6 +86,22 @@ public static class ReportEndpoints
 
         return reportInfo is null
             ? Results.NotFound()
-            : Results.Ok(reportInfo);
+            : Results.Ok(MapToResponse(reportInfo));
+    }
+
+    private static ReportJobInfoResponse MapToResponse(ReportJobInfo reportInfo)
+    {
+        return new ReportJobInfoResponse
+        {
+            ReportJobId = reportInfo.ReportJobId,
+            Percent = reportInfo.Percent,
+            Result = reportInfo.Result is null
+                ? null
+                : new UserStatisticsResult
+                {
+                    UserId = reportInfo.Result.UserId,
+                    CountSignIn = reportInfo.Result.CountSignIn
+                }
+        };
     }
 }

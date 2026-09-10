@@ -1,4 +1,4 @@
-using TestProject.Contracts;
+using TestProject.Services.Models;
 
 namespace TestProject.Services;
 
@@ -10,7 +10,7 @@ public interface IReportService
         DateOnly to,
         CancellationToken cancellationToken);
 
-    Task<ReportInfoResponse?> GetReportInfoAsync(Guid query, CancellationToken cancellationToken);
+    Task<ReportJobInfo?> GetReportInfoAsync(Guid reportJobId, CancellationToken cancellationToken);
 
     Task CompleteExpiredReportJobsAsync(CancellationToken cancellationToken);
 }

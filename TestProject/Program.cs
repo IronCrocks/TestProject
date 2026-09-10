@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using TestProject.BackgroundServices;
 using TestProject.Data;
 using TestProject.Endpoints;
+using TestProject.Options;
 using TestProject.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,11 +21,11 @@ builder.Services.AddProblemDetails();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services
-    .AddOptions<ReportWorkerOptions>()
-    .Bind(builder.Configuration.GetSection(ReportWorkerOptions.SectionName))
+    .AddOptions<ReportProcessingOptions>()
+    .Bind(builder.Configuration.GetSection(ReportProcessingOptions.SectionName))
     .Validate(
         options => options.DurationMilliseconds > 0,
-        "ReportWorker:DurationMilliseconds должен быть больше нуля.")
+        "ReportProcessing:DurationMilliseconds должен быть больше нуля.")
     .ValidateOnStart();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddHostedService<ReportWorker>();
