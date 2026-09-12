@@ -8,5 +8,5 @@ public sealed class UserStatisticsResult
     public Guid UserId { get; init; }
 
     [JsonPropertyName("count_sign_in")]
-    public int CountSignIn { get; init; }
+    public int? CountSignIn { get; init; }
 }

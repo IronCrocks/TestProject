@@ -69,7 +69,7 @@ public sealed class ReportService(
                 ? new UserStatisticsReportResult
                 {
                     UserId = reportJob.UserId,
-                    CountSignIn = reportJob.CountSignIn ?? 10
+                    CountSignIn = reportJob.CountSignIn
                 }
                 : null
         };
