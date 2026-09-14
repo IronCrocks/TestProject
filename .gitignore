@@ -8,3 +8,4 @@ riderModule.iml
 *.sqlite-shm
 *.sqlite-wal
 TestResults/
+.DS_Store
