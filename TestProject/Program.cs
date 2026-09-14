@@ -53,3 +53,5 @@ app.UseHttpsRedirection();
 app.MapReportEndpoints();
 
 app.Run();
+
+public partial class Program;
