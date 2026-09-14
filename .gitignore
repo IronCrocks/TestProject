@@ -2,6 +2,7 @@ bin/
 obj/
 /packages/
 riderModule.iml
+*.DotSettings.user
 /_ReSharper.Caches/
 .idea/
 *.sqlite
