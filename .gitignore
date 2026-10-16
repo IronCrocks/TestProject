@@ -1,12 +1,26 @@
-bin/
-obj/
+# Build artifacts
+[Bb]in/
+[Oo]bj/
 /packages/
+TestResults/
+
+# Rider / ReSharper
 riderModule.iml
 *.DotSettings.user
 /_ReSharper.Caches/
 .idea/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# SQLite
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
-TestResults/
+
+# macOS
 .DS_Store
