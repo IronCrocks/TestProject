@@ -4,26 +4,19 @@
 
 ## Требования
 
-- .NET SDK 10;
-- инструмент EF Core CLI. Если он ещё не установлен:
-
-  ```bash
-  dotnet tool install --global dotnet-ef
-  ```
+- .NET SDK 10.
 
 ## Запуск
 
-Из корня репозитория выполните:
+Откройте `TestProject.sln` в Rider или Visual Studio и запустите основной проект. При первом запуске приложение создаст локальный файл `TestDatabase.sqlite` и применит миграции. Файл базы данных не хранится в Git.
+
+Для запуска из терминала выполните из корня репозитория:
 
 ```bash
-dotnet restore
-dotnet ef database update --project TestProject/TestProject.csproj
 dotnet run --project TestProject/TestProject.csproj
 ```
 
-Команда `database update` создаёт локальный файл `TestDatabase.sqlite` и применяет миграции. Файл базы данных не хранится в Git.
-
-В профиле разработки API доступно по адресу `http://localhost:5095`. OpenAPI-документ доступен только в окружении `Development`.
+API доступно по адресу `http://localhost:5095`. OpenAPI-документ доступен в окружении `Development`.
 
 ## Настройки
 
@@ -104,19 +97,31 @@ dotnet run --project TestProject/TestProject.csproj
 
 Текущая миграция создаёт таблицу `ReportJobs` со статусом задачи и необязательным полем `CountSignIn`. Статус сохраняется в базе текстом; для `CountSignIn` действует ограничение: значение не может быть отрицательным.
 
+### Ручное применение миграций
+
+Для работы с миграциями вручную установите EF Core CLI:
+
+```bash
+dotnet tool install --global dotnet-ef
+```
+
+Затем из корня репозитория выполните:
+
+```bash
+dotnet ef database update --project TestProject/TestProject.csproj
+```
+
+Команда использует строку подключения из `appsettings.json`, при необходимости создаёт базу и применяет только отсутствующие миграции.
+
+### Создание новой миграции
+
 Чтобы создать миграцию после изменения EF Core-модели:
 
 ```bash
 dotnet ef migrations add <MigrationName> --project TestProject/TestProject.csproj
 ```
 
-Затем примените её:
-
-```bash
-dotnet ef database update --project TestProject/TestProject.csproj
-```
-
-Не удаляйте и не изменяйте применённые миграции: последующие изменения схемы оформляйте новой миграцией.
+Применённые миграции не следует изменять или удалять: последующие изменения схемы оформляются новой миграцией.
 
 ## Тесты
 
