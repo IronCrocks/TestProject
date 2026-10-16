@@ -113,16 +113,6 @@ dotnet ef database update --project TestProject/TestProject.csproj
 
 Команда использует строку подключения из `appsettings.json`, при необходимости создаёт базу и применяет только отсутствующие миграции.
 
-### Создание новой миграции
-
-Чтобы создать миграцию после изменения EF Core-модели:
-
-```bash
-dotnet ef migrations add <MigrationName> --project TestProject/TestProject.csproj
-```
-
-Применённые миграции не следует изменять или удалять: последующие изменения схемы оформляются новой миграцией.
-
 ## Тесты
 
 ```bash
